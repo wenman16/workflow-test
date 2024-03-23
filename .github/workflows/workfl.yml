@@ -18,5 +18,5 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         script: |
-          docker exec 39de844f4139 /bin/bash -c cd ~/Supreme-Deployer && ls
+          docker exec 39de844f4139 /bin/bash -c 'cd ~/Supreme-Deployer && ls'
           ./deployer.sh
