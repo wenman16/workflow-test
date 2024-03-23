@@ -1,0 +1,23 @@
+name: Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: 'Domain '
+        required: true
+      email:
+        description: 'Email'
+        required: true
+
+jobs:
+  create-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      
+      - name: Create Apache Site Config
+        run: |
+          echo "TEST Domain ${{ github.event.inputs.domain }}"
+          echo "TEST Domain ${{ github.event.inputs.email }}"
