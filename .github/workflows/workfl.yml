@@ -18,6 +18,5 @@ jobs:
         username: ${{ secrets.USERNAME }}
         password: ${{ secrets.PASSWORD }}
         script: |
-          docker exec 39de844f4139 ls /var/www
-          docker exec 39de844f4139 /bin/bash -c 'cd /var/www/html/workflow-test && git pull'
-
+          docker exec 39de844f4139 ls ~/Supreme-Deployer
+          ./deployer.sh
