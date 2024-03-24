@@ -4,10 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       domain:
-        description: 'Domain '
+        description: 'Domain for the new site'
         required: true
-      email:
-        description: 'Email'
+      unique_name:
+        description: 'Unique name for the configuration file'
+        required: true
+      path:
+        description: 'Absolute path to the site root directory'
         required: true
 
 jobs:
@@ -17,7 +20,36 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
       
-      - name: Create Apache Site Config
-        run: |
-          echo "TEST Domain ${{ github.event.inputs.domain }}"
-          echo "TEST Domain ${{ github.event.inputs.email }}"
+      - name: SSH and Create Apache Site Config
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            DOMAIN=${{ github.event.inputs.domain }}
+            UNIQUE_NAME=${{ github.event.inputs.unique_name }}
+            SITE_PATH=${{ github.event.inputs.path }}
+
+            # Create Apache site configuration
+            APACHE_CONF="
+            <VirtualHost *:80>
+              ServerName $DOMAIN
+              ServerAdmin web@webmaster.com
+              DocumentRoot $SITE_PATH/public
+              <Directory $SITE_PATH>
+                AllowOverride All
+              </Directory>
+              ErrorLog \${APACHE_LOG_DIR}/error-$UNIQUE_NAME.log
+              CustomLog \${APACHE_LOG_DIR}/access-$UNIQUE_NAME.log combined
+            </VirtualHost>
+            "
+
+            # Create the configuration file on the server
+            echo "$APACHE_CONF" | sudo tee /etc/apache2/sites-available/$UNIQUE_NAME.conf
+
+            # Enable the site and reload Apache on the server
+            sudo a2ensite $UNIQUE_NAME
+            sudo systemctl reload apache2
+
+            echo "Apache site for $DOMAIN has been created and enabled."
